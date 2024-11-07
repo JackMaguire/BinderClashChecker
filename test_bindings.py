@@ -1,7 +1,7 @@
 import pyrosetta
 from pyrosetta.rosetta import core
-import pybind11
-import inspect
+#import pybind11
+#import inspect
 
 class MyClass:
     def __init__(self):
@@ -43,7 +43,11 @@ def signatures_conflict( sig1, sig2, only_enforce_distinct_parents=True ):
     return True
     
 
-def test_function( F ):
+def test_function( F, custom_name = None ):
+
+    if custom_name is None:
+        custom_name = str(F)
+
     failed = True
     try:
         F( MyClass() )
@@ -88,7 +92,7 @@ def test_function( F ):
     for i in range(len(signatures)):
         for j in range(i+1,len(signatures)):
             if signatures_conflict( signatures[i], signatures[j] ):
-                print( f"CONFLICT {F} {signatures[i]} {signatures[j]}" )
+                print( f"CONFLICT `{custom_name}` --- `{signatures[i]}` --- `{signatures[j]}`" )
 
 def test_class( C ):
     # 1. test __init__
@@ -110,7 +114,7 @@ def test_class( C ):
         type_str = str( type( cattr ) )
         if type_str == "<class 'instancemethod'>":
             try:
-                test_function( cattr )
+                test_function( cattr, custom_name=f"{C}::{cname}" )
             except AssertionError as e:
                 if "takes no arguments" in str(e):
                     pass
@@ -118,7 +122,7 @@ def test_class( C ):
                     raise e
         elif type_str == "<class 'module'>":
             print( cattr )
-            exit( 0 )
+            exit( 0 ) #testing to see if this is possible
             test_module( cattr )
         else:
             print( "skipping type", type_str, "for", cname, "in", C )
@@ -142,3 +146,5 @@ def test_module( D ):
 if __name__ == '__main__':
     #test_class( core.select.residue_selector.NotResidueSelector )
     test_module( core )
+
+#env1_run python3 test_bindings.py | grep CONFLICT | sort | uniq | sed 's/---/\n -/g' > core_problems.txt
