@@ -147,4 +147,4 @@ if __name__ == '__main__':
     #test_class( core.select.residue_selector.NotResidueSelector )
     test_module( core )
 
-#env1_run python3 test_bindings.py | grep CONFLICT | sort | uniq | sed 's/---/\n -/g' > core_problems.txt
+#env1_run python3 test_bindings.py | grep CONFLICT | sort | uniq | sed 's/---/\n -/g' | sed 's/CONFLICT/\nCONFLICT/g' > core_problems.txt
